@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - CCA</title>
+</head>
+<body>
+    <header>
+        <div>
+            <a href="/">CCA</a>
+            <button type="button">☰</button>
+            <div>
+                <nav>
+                    <ul>
+                        <li><a href="/">Browse</a></li>
+                        <li><a href="/Artists">Artists</a></li>
+                        <li><a href="#">Gallery</a></li>
+                        <li><a href="#">Journal</a></li>
+                    </ul>
+                </nav>
+                <div>
+                    <input type="search" placeholder="Search gallery..." aria-label="Search">
+                    <span>🔔</span>
+                    <div></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        @RenderBody()
+    </main>
+
+    <footer>
+        <div>
+            <div>
+                <div>
+                    <h5>Commission Center for Artists.</h5>
+                    <p>Curated Excellence.</p>
+                </div>
+                <div>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Support</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
