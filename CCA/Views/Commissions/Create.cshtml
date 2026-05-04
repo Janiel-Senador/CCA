@@ -1,0 +1,120 @@
+﻿@{
+    ViewData["Title"] = "Request Commission";
+}
+
+<partial name="_TopAppBar" />
+
+<main class="container py-4">
+    <div class="row g-5">
+        @* Form Section *@
+        <div class="col-lg-8">
+            <form asp-controller="Commissions" asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                
+                @* Step 1 *@
+                <section class="mb-5">
+                    <div class="d-flex align-items-baseline gap-3 mb-4">
+                        <span class="display-6 fst-italic text-muted">01</span>
+                        <h3 class="fw-bold">The Vision</h3>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-uppercase text-muted">Project Description</label>
+                        <textarea name="Description" class="form-control" rows="6" placeholder="Describe your vision..."></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label fw-bold small text-uppercase text-muted">Visual References</label>
+                        <div class="row g-3">
+                            <div class="col-4">
+                                <div class="border border-dashed rounded p-4 text-center text-muted" style="height: 120px; cursor: pointer;">
+                                    <span class="d-block">+</span>
+                                    <small>Upload</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="bg-dark rounded" style="height: 120px; position: relative;">
+                                    <button type="button" class="btn btn-sm btn-light position-absolute top-0 end-0 m-1">×</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                @* Step 2 *@
+                <section class="mb-5">
+                    <div class="d-flex align-items-baseline gap-3 mb-4">
+                        <span class="display-6 fst-italic text-muted">02</span>
+                        <h3 class="fw-bold">Options</h3>
+                    </div>
+                    
+                    <label class="form-label fw-bold small text-uppercase text-muted">Turnaround Time</label>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="card border p-3 cursor-pointer h-100">
+                                <input type="radio" name="TurnaroundOption" value="standard" class="form-check-input me-2" checked>
+                                <span class="fw-semibold">Standard</span>
+                                <small class="text-muted d-block">14-21 days</small>
+                                <span class="badge bg-teal bg-opacity-10 text-teal mt-2">Included</span>
+                            </label>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="card border p-3 cursor-pointer h-100">
+                                <input type="radio" name="TurnaroundOption" value="express" class="form-check-input me-2">
+                                <span class="fw-semibold">Express</span>
+                                <small class="text-muted d-block">5-7 days</small>
+                                <span class="badge bg-warning bg-opacity-10 text-warning mt-2">+$150</span>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <button type="submit" class="btn btn-teal btn-lg w-100">Complete Request</button>
+                <p class="text-center text-muted small mt-3">Billed once artist accepts</p>
+            </form>
+        </div>
+
+        @* Order Summary Sidebar *@
+        <aside class="col-lg-4">
+            <div class="card border-0 shadow-sm sticky-top pt-4">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-4">Order Summary</h5>
+                    
+                    <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+                        <div class="bg-dark rounded-circle" style="width: 50px; height: 50px;"></div>
+                        <div>
+                            <small class="text-muted text-uppercase fw-bold d-block">Selected Artist</small>
+                            <span class="fw-semibold">@ViewBag.ArtistName</span>
+                        </div>
+                    </div>
+
+                    <div class="small mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Base Commission</span>
+                            <span>$850.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Service Fee (5%)</span>
+                            <span>$42.50</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Insurance</span>
+                            <span>$12.00</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center py-3 border-top">
+                        <span class="fw-bold">Total</span>
+                        <span class="fs-4 fw-bold text-teal">$904.50</span>
+                    </div>
+
+                    <div class="text-center small text-muted mt-3">
+                        <span>🔒</span> Secure Escrow Protection
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+</main>
+
+<partial name="_Footer" />
