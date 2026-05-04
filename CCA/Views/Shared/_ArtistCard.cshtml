@@ -1,0 +1,17 @@
+﻿@* Reusable artist card - no model needed for front-end demo *@
+<div class="card border-0 shadow-sm h-100">
+    <div class="bg-dark rounded-top" style="height: 200px;"></div>
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+            <div>
+                <h5 class="card-title mb-0">Artist Name</h5>
+                <small class="text-muted">Digital Art Specialist</small>
+            </div>
+            <span class="badge bg-light text-dark border">4.8 ★</span>
+        </div>
+        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+            <span class="fw-bold text-teal">$350+</span>
+            <a asp-controller="Artists" asp-action="Profile" asp-route-slug="demo" class="text-decoration-none text-teal fw-bold small">Inquire →</a>
+        </div>
+    </div>
+</div>
