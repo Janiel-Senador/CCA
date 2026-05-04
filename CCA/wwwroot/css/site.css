@@ -29,3 +29,48 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+/* Elnet-CCA Design Tokens */
+:root {
+    --teal: #00464a;
+    --teal-dark: #006064;
+    --surface: #f9f9f8;
+}
+
+.text-teal {
+    color: var(--teal) !important;
+}
+
+.bg-teal {
+    background-color: var(--teal) !important;
+}
+
+.btn-teal {
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    color: white;
+    border: none;
+}
+
+    .btn-teal:hover {
+        background: linear-gradient(135deg, var(--teal-dark), var(--teal));
+        color: white;
+        opacity: 0.95;
+    }
+
+.btn-outline-teal {
+    color: var(--teal);
+    border-color: var(--teal);
+}
+
+    .btn-outline-teal:hover {
+        background-color: var(--teal);
+        color: white;
+    }
+
+.border-dashed {
+    border-style: dashed !important;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
