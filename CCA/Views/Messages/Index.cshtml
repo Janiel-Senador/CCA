@@ -1,0 +1,59 @@
+﻿@model List<CCA.ViewModels.ConversationViewModel>
+@{
+    ViewData["Title"] = "Messages";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold">Messages</h3>
+        <a asp-controller="Artists" asp-action="Browse" class="btn btn-outline-primary btn-sm">
+            Start New Conversation
+        </a>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="list-group shadow-sm border-0">
+            @foreach (var convo in Model.OrderByDescending(c => c.LastMessage.SentAt))
+            {
+                <a asp-action="Chat" asp-route-userId="@convo.Partner.Id"
+                       class="list-group-item list-group-item-action @(convo.UnreadCount > 0 ? "border-start border-4 border-primary" : "")">
+                    <div class="d-flex w-100 justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <!-- ✅ Null-safe profile picture -->
+                            <img src="@convo.PartnerPortraitUrl"
+                                 class="rounded-circle border me-3" width="50" height="50"
+                                 alt="@convo.Partner.FullName"
+                                 onerror="this.src='https://ui-avatars.com/api/?name=@(Uri.EscapeDataString(convo.Partner.FullName ?? "User"))&background=random'">
+                            <div>
+                                <h6 class="mb-1 fw-bold">@convo.Partner.FullName</h6>
+                                <small class="text-muted">@convo.Partner.UserRole</small>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted d-block">@convo.LastMessage.SentAt.ToString("MMM d, h:mm tt")</small>
+                            @if (convo.UnreadCount > 0)
+                            {
+                                <span class="badge bg-primary mt-1">@convo.UnreadCount</span>
+                            }
+                        </div>
+                    </div>
+                    <p class="mb-1 text-muted small mt-2 text-truncate" style="max-width: 70%;">
+                        @convo.LastMessage.Content
+                    </p>
+                </a>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0 text-center py-5">
+            <div class="card-body">
+                <div class="display-1 mb-3">💬</div>
+                <h5 class="fw-bold mb-2">No messages yet</h5>
+                <p class="text-muted mb-4">Start a conversation by requesting a commission or browsing artists.</p>
+                <a asp-controller="Artists" asp-action="Browse" class="btn btn-primary px-4">Browse Artists</a>
+            </div>
+        </div>
+    }
+</div>
