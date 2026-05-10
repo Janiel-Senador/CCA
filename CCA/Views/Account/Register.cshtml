@@ -1,0 +1,120 @@
+﻿@model CCA.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Create Account";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 p-md-5">
+                    <h2 class="text-center fw-bold mb-4">Create Account</h2>
+                    
+                    <!-- ✅ FIX: Only show error box if there are actual errors -->
+                    @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
+                    {
+                        <div class="alert alert-danger mb-4">
+                            <ul class="mb-0">
+                                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                {
+                                    <li>@error.ErrorMessage</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+
+                    <form asp-action="Register" method="post">
+                        @Html.AntiForgeryToken()
+                        
+                        <!-- FullName -->
+                        <div class="mb-3">
+                            <label asp-for="FullName" class="form-label fw-medium">FullName</label>
+                            <input asp-for="FullName" class="form-control" placeholder="Your full name" />
+                            <span asp-validation-for="FullName" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-medium">Email</label>
+                            <input asp-for="Email" class="form-control" placeholder="you@example.com" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <!-- UserRole (Customer/Artist Toggle) -->
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">I am a...</label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="UserRole" id="roleCustomer" value="Customer" checked>
+                                <label class="btn btn-outline-primary" for="roleCustomer">Customer</label>
+                                
+                                <input type="radio" class="btn-check" name="UserRole" id="roleArtist" value="Artist">
+                                <label class="btn btn-outline-primary" for="roleArtist">Artist</label>
+                            </div>
+                            <span asp-validation-for="UserRole" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Artist Fields (Show only if Artist is selected) -->
+                        <div id="artistFields" class="d-none">
+                            <div class="mb-3">
+                                <label asp-for="ArtistBio" class="form-label fw-medium">Artist Bio</label>
+                                <textarea asp-for="ArtistBio" class="form-control" rows="3" placeholder="Tell us about your art..."></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="ArtistLocation" class="form-label fw-medium">Location</label>
+                                <input asp-for="ArtistLocation" class="form-control" placeholder="City, Country" />
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label fw-medium">Password</label>
+                            <input asp-for="Password" class="form-control" placeholder="Min. 6 characters" />
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Confirm Password -->
+                        <div class="mb-4">
+                            <label asp-for="ConfirmPassword" class="form-label fw-medium">Confirm Password</label>
+                            <input asp-for="ConfirmPassword" class="form-control" placeholder="Re-enter password" />
+                            <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary w-100 py-2 mb-3">Create Account</button>
+
+                        <!-- Login Link -->
+                        <div class="text-center">
+                            <small class="text-muted">Already have an account? <a asp-action="Login" class="text-decoration-none">Sign in</a></small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Show/hide artist fields based on role selection
+        document.addEventListener('DOMContentLoaded', function() {
+            const customerRadio = document.getElementById('roleCustomer');
+            const artistRadio = document.getElementById('roleArtist');
+            const artistFields = document.getElementById('artistFields');
+            
+            function toggleArtistFields() {
+                if (artistRadio.checked) {
+                    artistFields.classList.remove('d-none');
+                } else {
+                    artistFields.classList.add('d-none');
+                }
+            }
+            
+            customerRadio.addEventListener('change', toggleArtistFields);
+            artistRadio.addEventListener('change', toggleArtistFields);
+            
+            // Initial check
+            toggleArtistFields();
+        });
+    </script>
+}

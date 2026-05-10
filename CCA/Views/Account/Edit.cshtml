@@ -1,0 +1,115 @@
+﻿@model CCA.ViewModels.EditProfileViewModel
+@{
+    ViewData["Title"] = "Edit Profile";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-bottom py-3">
+                <h4 class="fw-bold mb-0">✏️ Edit Your Profile</h4>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        @TempData["Success"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+                
+                <!-- ✅ CRITICAL: enctype for file upload -->
+                <form asp-action="Edit" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    @Html.AntiForgeryToken()
+                    
+                    <!-- Profile Picture Upload -->
+                    <div class="mb-4 text-center">
+                        <img src="@(Model?.ExistingPortraitUrl ?? "https://ui-avatars.com/api/?name=" + Uri.EscapeDataString(Model?.FullName ?? "User"))"
+                             id="portraitPreview" class="rounded-circle mb-3 border" width="100" height="100" alt="Profile">
+                        <div>
+                            <label class="form-label small text-muted">Profile Picture</label>
+                            <input type="file" name="PortraitFile" class="form-control form-control-sm" accept="image/*" id="portraitInput" />
+                            <small class="text-muted d-block mt-1">Max 2MB. JPG, PNG, or GIF.</small>
+                            <input type="hidden" name="ExistingPortraitUrl" value="@Model?.ExistingPortraitUrl" />
+                        </div>
+                    </div>
+
+                    <!-- Full Name -->
+                    <div class="mb-3">
+                        <label asp-for="FullName" class="form-label fw-bold">Full Name</label>
+                        <input asp-for="FullName" class="form-control" placeholder="Your name" value="@(Model?.FullName ?? "")" />
+                        <span asp-validation-for="FullName" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label fw-bold">Email Address</label>
+                        <input asp-for="Email" class="form-control" type="email" placeholder="you@example.com" value="@(Model?.Email ?? "")" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                        <small class="text-muted">Changing your email may require re-verification.</small>
+                    </div>
+
+                    <!-- Bio (Customer) -->
+                    @if (Model?.UserRole == "Customer")
+                    {
+                        <div class="mb-3">
+                            <label asp-for="Bio" class="form-label">About You</label>
+                            <textarea asp-for="Bio" class="form-control" rows="3" placeholder="Tell us about yourself...">@(Model?.Bio ?? "")</textarea>
+                        </div>
+                    }
+
+                    <!-- Artist Fields -->
+                    @if (Model?.UserRole == "Artist")
+                    {
+                        <div class="border rounded p-3 mb-3 bg-light">
+                            <h6 class="fw-bold mb-3">🎨 Artist Profile</h6>
+                            
+                            <div class="mb-3">
+                                <label asp-for="ArtistBio" class="form-label">Artist Bio</label>
+                                <textarea asp-for="ArtistBio" class="form-control" rows="3" placeholder="Describe your art style...">@(Model?.ArtistBio ?? "")</textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label asp-for="ArtistLocation" class="form-label">Location</label>
+                                <input asp-for="ArtistLocation" class="form-control" placeholder="City, Country" value="@(Model?.ArtistLocation ?? "")" />
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Website & Social -->
+                    <div class="mb-3">
+                        <label asp-for="WebsiteUrl" class="form-label">Website</label>
+                        <input asp-for="WebsiteUrl" class="form-control" placeholder="https://yourportfolio.com" value="@(Model?.WebsiteUrl ?? "")" />
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label asp-for="SocialMediaHandle" class="form-label">Social Media</label>
+                        <input asp-for="SocialMediaHandle" class="form-control" placeholder="e.g. @@yourhandle" value="@(Model?.SocialMediaHandle ?? "")" />
+                    </div>
+
+                    <!-- ✅ SAVE BUTTONS -->
+                    <div class="d-flex gap-3 pt-3 border-top">
+                        <button type="submit" class="btn btn-primary px-4">💾 Save Changes</button>
+                        <a asp-action="Profile" class="btn btn-outline-secondary px-4">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Preview uploaded image before submit
+        document.getElementById('portraitInput')?.addEventListener('change', function(e) {
+            const file = e.target?.files?.[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('portraitPreview').src = event.target?.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+}
