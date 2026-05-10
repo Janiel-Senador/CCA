@@ -1,21 +1,32 @@
-﻿@{
-    ViewData["Title"] = "Request Received";
+﻿@model CCA.Models.CommissionRequest
+@{
+    ViewData["Title"] = "Commission Requested";
 }
 
-<partial name="_TopAppBar" />
-
-<main class="container py-5 text-center">
-    <div class="card border-0 shadow-sm mx-auto" style="max-width: 600px;">
-        <div class="card-body py-5">
-            <h2 class="display-4 text-teal mb-3">✓</h2>
-            <h3 class="fw-bold mb-3">Request Submitted!</h3>
-            <p class="text-muted mb-4">Your commission request has been sent to the artist. You'll receive a confirmation email shortly.</p>
-            <div class="d-flex justify-content-center gap-3">
-                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Browse More</a>
-                <a asp-controller="Artists" asp-action="Profile" asp-route-slug="demo" class="btn btn-teal">View Artist</a>
+<div class="container py-5 text-center">
+    <div class="card shadow-sm border-0 mx-auto" style="max-width: 600px;">
+        <div class="card-body p-5">
+            <div class="display-1 text-success mb-3">✓</div>
+            <h2 class="fw-bold mb-3">Commission Requested</h2>
+            <p class="lead text-muted mb-4">
+                Your request has been sent to @(Model?.Artist?.Name ?? "the artist").
+            </p>
+            
+            <div class="bg-light rounded p-3 mb-4 text-start">
+                <p class="mb-1"><strong>Request ID:</strong> #@Model?.Id</p>
+                <p class="mb-1"><strong>Description:</strong> @(Model?.Description?.Length > 80 ? Model.Description?.Substring(0, 80) + "..." : Model?.Description)</p>
+                <p class="mb-1"><strong>Total Price:</strong> $@Model?.TotalPrice.ToString("F0")</p>
+                <p class="mb-0"><strong>Status:</strong> <span class="badge bg-warning">@Model?.Status</span></p>
+            </div>
+            
+            <p class="text-muted small mb-4">
+                The artist will review your request and respond within 48 hours. You will receive an email notification when they reply.
+            </p>
+            
+            <div class="d-flex gap-3 justify-content-center">
+                <a asp-controller="Artists" asp-action="Browse" class="btn btn-outline-secondary">Browse More Artists</a>
+                <a asp-controller="Messages" asp-action="Index" class="btn btn-primary">View Messages</a>
             </div>
         </div>
     </div>
-</main>
-
-<partial name="_Footer" />
+</div>

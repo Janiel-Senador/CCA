@@ -1,120 +1,124 @@
-﻿@{
-    ViewData["Title"] = "Request Commission";
+﻿@model CCA.ViewModels.CommissionRequestViewModel
+@{
+    ViewData["Title"] = $"Request Commission - {Model.ArtistName}";
 }
 
-<partial name="_TopAppBar" />
-
-<main class="container py-4">
-    <div class="row g-5">
-        @* Form Section *@
+<div class="container py-4">
+    <div class="row justify-content-center">
         <div class="col-lg-8">
-            <form asp-controller="Commissions" asp-action="Create" method="post">
-                @Html.AntiForgeryToken()
-                
-                @* Step 1 *@
-                <section class="mb-5">
-                    <div class="d-flex align-items-baseline gap-3 mb-4">
-                        <span class="display-6 fst-italic text-muted">01</span>
-                        <h3 class="fw-bold">The Vision</h3>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label class="form-label fw-bold small text-uppercase text-muted">Project Description</label>
-                        <textarea name="Description" class="form-control" rows="6" placeholder="Describe your vision..."></textarea>
-                    </div>
-                    
-                    <div>
-                        <label class="form-label fw-bold small text-uppercase text-muted">Visual References</label>
-                        <div class="row g-3">
-                            <div class="col-4">
-                                <div class="border border-dashed rounded p-4 text-center text-muted" style="height: 120px; cursor: pointer;">
-                                    <span class="d-block">+</span>
-                                    <small>Upload</small>
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h4 class="fw-bold mb-0">🎨 Request Commission</h4>
+                    <small class="text-muted">with @Model.ArtistName</small>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <!-- ✅ CRITICAL: asp-action="Submit" matches the POST route -->
+                    <form asp-action="Submit" method="post" class="needs-validation" novalidate>
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="ArtistId" />
+                        
+                        <!-- Commission Tier Selection -->
+                        <div class="mb-4">
+                            <label asp-for="BasePrice" class="form-label fw-bold">Commission Package</label>
+                            <select asp-for="BasePrice" class="form-select" id="tierSelect">
+                                @if (Model.AvailableTiers != null)
+                                {
+                                    @foreach (var tier in Model.AvailableTiers)
+                                    {
+                                        <option value="@tier.Value">@tier.Text</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="BasePrice" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Project Description -->
+                        <div class="mb-4">
+                            <label asp-for="Description" class="form-label fw-bold">Project Details</label>
+                            <textarea asp-for="Description" class="form-control" rows="4" placeholder="Describe what you'd like commissioned (subject, size, reference images, deadline, etc.)..." required></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                            <small class="text-muted">Be as detailed as possible for the best results.</small>
+                        </div>
+
+                        <!-- Turnaround Time -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Turnaround Preference</label>
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <input type="radio" class="btn-check" name="TurnaroundOption" id="standard" value="standard" checked>
+                                    <label class="btn btn-outline-primary w-100" for="standard">
+                                        📅 Standard (2-3 weeks)
+                                    </label>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="radio" class="btn-check" name="TurnaroundOption" id="express" value="express">
+                                    <label class="btn btn-outline-warning w-100" for="express">
+                                        ⚡ Express (1 week) <small class="text-muted">+25%</small>
+                                    </label>
                                 </div>
                             </div>
-                            <div class="col-4">
-                                <div class="bg-dark rounded" style="height: 120px; position: relative;">
-                                    <button type="button" class="btn btn-sm btn-light position-absolute top-0 end-0 m-1">×</button>
-                                </div>
+                        </div>
+
+                        <!-- Price Summary -->
+                        <div class="mb-4 p-3 bg-light rounded">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Base Price:</span>
+                                <span class="fw-bold" id="basePriceDisplay">$@Model.BasePrice.ToString("F0")</span>
                             </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Express Fee:</span>
+                                <span class="fw-bold text-warning" id="expressFeeDisplay">$0</span>
+                            </div>
+                            <hr class="my-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold fs-5">Total:</span>
+                                <span class="fw-bold text-primary fs-4" id="totalDisplay">$@Model.BasePrice.ToString("F0")</span>
+                            </div>
+                            <input type="hidden" asp-for="Total" id="totalInput" />
                         </div>
-                    </div>
-                </section>
 
-                @* Step 2 *@
-                <section class="mb-5">
-                    <div class="d-flex align-items-baseline gap-3 mb-4">
-                        <span class="display-6 fst-italic text-muted">02</span>
-                        <h3 class="fw-bold">Options</h3>
-                    </div>
-                    
-                    <label class="form-label fw-bold small text-uppercase text-muted">Turnaround Time</label>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="card border p-3 cursor-pointer h-100">
-                                <input type="radio" name="TurnaroundOption" value="standard" class="form-check-input me-2" checked>
-                                <span class="fw-semibold">Standard</span>
-                                <small class="text-muted d-block">14-21 days</small>
-                                <span class="badge bg-teal bg-opacity-10 text-teal mt-2">Included</span>
-                            </label>
+                        <!-- Actions -->
+                        <div class="d-flex gap-3">
+                            <button type="submit" class="btn btn-primary px-4 flex-grow-1">
+                                💰 Submit Request
+                            </button>
+                            <a href="javascript:history.back()" class="btn btn-outline-secondary px-4">
+                                Cancel
+                            </a>
                         </div>
-                        <div class="col-md-6">
-                            <label class="card border p-3 cursor-pointer h-100">
-                                <input type="radio" name="TurnaroundOption" value="express" class="form-check-input me-2">
-                                <span class="fw-semibold">Express</span>
-                                <small class="text-muted d-block">5-7 days</small>
-                                <span class="badge bg-warning bg-opacity-10 text-warning mt-2">+$150</span>
-                            </label>
-                        </div>
-                    </div>
-                </section>
-
-                <button type="submit" class="btn btn-teal btn-lg w-100">Complete Request</button>
-                <p class="text-center text-muted small mt-3">Billed once artist accepts</p>
-            </form>
-        </div>
-
-        @* Order Summary Sidebar *@
-        <aside class="col-lg-4">
-            <div class="card border-0 shadow-sm sticky-top pt-4">
-                <div class="card-body">
-                    <h5 class="fw-bold mb-4">Order Summary</h5>
-                    
-                    <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
-                        <div class="bg-dark rounded-circle" style="width: 50px; height: 50px;"></div>
-                        <div>
-                            <small class="text-muted text-uppercase fw-bold d-block">Selected Artist</small>
-                            <span class="fw-semibold">@ViewBag.ArtistName</span>
-                        </div>
-                    </div>
-
-                    <div class="small mb-3">
-                        <div class="d-flex justify-content-between">
-                            <span class="text-muted">Base Commission</span>
-                            <span>$850.00</span>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <span class="text-muted">Service Fee (5%)</span>
-                            <span>$42.50</span>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <span class="text-muted">Insurance</span>
-                            <span>$12.00</span>
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-between align-items-center py-3 border-top">
-                        <span class="fw-bold">Total</span>
-                        <span class="fs-4 fw-bold text-teal">$904.50</span>
-                    </div>
-
-                    <div class="text-center small text-muted mt-3">
-                        <span>🔒</span> Secure Escrow Protection
-                    </div>
+                    </form>
                 </div>
             </div>
-        </aside>
+        </div>
     </div>
-</main>
+</div>
 
-<partial name="_Footer" />
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tierSelect = document.getElementById('tierSelect');
+            const expressRadio = document.getElementById('express');
+            const basePriceDisplay = document.getElementById('basePriceDisplay');
+            const expressFeeDisplay = document.getElementById('expressFeeDisplay');
+            const totalDisplay = document.getElementById('totalDisplay');
+            const totalInput = document.getElementById('totalInput');
+            
+            function updateTotal() {
+                const basePrice = parseFloat(tierSelect?.value) || 0;
+                const isExpress = expressRadio?.checked;
+                const expressFee = isExpress ? basePrice * 0.25 : 0;
+                const total = basePrice + expressFee;
+                
+                basePriceDisplay.textContent = `$${basePrice.toFixed(0)}`;
+                expressFeeDisplay.textContent = isExpress ? `$${expressFee.toFixed(0)}` : '$0';
+                totalDisplay.textContent = `$${total.toFixed(0)}`;
+                if (totalInput) totalInput.value = total.toFixed(2);
+            }
+            
+            tierSelect?.addEventListener('change', updateTotal);
+            expressRadio?.addEventListener('change', updateTotal);
+            updateTotal(); // Initial calculation
+        });
+    </script>
+}
