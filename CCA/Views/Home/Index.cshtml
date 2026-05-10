@@ -1,66 +1,153 @@
-﻿@{
-    ViewData["Title"] = "Browse";
+﻿@model CCA.ViewModels.HomeIndexViewModel
+@{
+    ViewData["Title"] = "CCA - Commission Custom Art";
 }
 
 <!-- Hero Section -->
-<div class="row align-items-center mb-5">
-    <div class="col-md-6">
-        <span class="text-uppercase text-muted small fw-bold">Artist Spotlight</span>
-        <h1 class="display-3 mt-2">Mastering the Quietude</h1>
-        <p class="lead text-muted">Discover the evocative landscapes of Elena Thorne, whose latest commission series explores the intersection of brutalist architecture and ethereal light.</p>
-        <button class="btn btn-primary-cca mt-3">Commission Artist</button>
-        <a href="#" class="ms-3 text-decoration-none text-dark fw-bold">Explore Portfolio &rarr;</a>
-    </div>
-    <div class="col-md-6">
-        <!-- Placeholder for Hero Image -->
-        <div class="bg-light rounded p-5 text-center" style="height: 300px; background: linear-gradient(45deg, #e0f2f1, #fff);">
-            <span class="text-muted">Hero Artwork Image</span>
-        </div>
-    </div>
-</div>
-
-<!-- Trending Categories -->
-<h3 class="mb-4">Trending Categories</h3>
-<div class="row g-4 mb-5">
-    <div class="col-md-6">
-        <div class="position-relative rounded overflow-hidden" style="height: 300px; background-color: #1a1a1a;">
-            <div class="position-absolute bottom-0 start-0 p-3 text-white">
-                <h4>Digital Illustration</h4>
-                <small>2,400+ Artists active</small>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="position-relative rounded overflow-hidden" style="height: 140px; background-color: #5d4037;">
-            <div class="position-absolute bottom-0 start-0 p-3 text-white"><h5>Oil Portraits</h5></div>
-        </div>
-        <div class="position-relative rounded overflow-hidden mt-3" style="height: 140px; background-color: #37474f;">
-            <div class="position-absolute bottom-0 start-0 p-3 text-white"><h5>Character Design</h5></div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="position-relative rounded overflow-hidden" style="height: 300px; background-color: #263238;">
-            <div class="position-absolute bottom-0 start-0 p-3 text-white"><h5>Sculpture</h5></div>
-        </div>
-    </div>
-</div>
-
-<!-- Recent Commissions -->
-<h3 class="mb-4">Recent Commissions</h3>
-<div class="row">
-    <!-- Commission Item -->
-    <div class="col-md-4 mb-4">
-        <div class="card border-0 shadow-sm">
-            <div class="bg-dark" style="height: 250px;"></div>
-            <div class="card-body">
-                <h5 class="card-title">The Celestial Shore</h5>
-                <p class="text-muted small">by Julian Vossen</p>
-                <div class="d-flex justify-content-between align-items-center">
-                    <span class="fw-bold">$450</span>
-                    <span class="badge bg-light text-dark border">4.9 ★</span>
+<section class="bg-light py-5 py-lg-7">
+    <div class="container px-4 px-lg-5">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-3">Commission Custom Art, Made Simple</h1>
+                <p class="lead text-muted mb-4">Connect with talented artists for personalized artwork. From portraits to digital illustrations, bring your vision to life.</p>
+                <div class="d-flex gap-3">
+                    <a asp-controller="Artists" asp-action="Browse" class="btn btn-primary btn-lg px-4">Browse Artists</a>
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-outline-secondary btn-lg px-4">Become an Artist</a>
                 </div>
             </div>
+            <div class="col-lg-6 d-none d-lg-block">
+                <img src="https://images.unsplash.com/photo-1547891654-e66ed7ebb968?auto=format&fit=crop&w=600&q=80"
+                     class="img-fluid rounded-3 shadow" alt="Art commission example">
+            </div>
         </div>
     </div>
-    <!-- Repeat for other items... -->
-</div>
+</section>
+
+<!-- Stats Bar -->
+<section class="py-4 border-bottom">
+    <div class="container px-4 px-lg-5">
+        <div class="row text-center">
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="fs-2 fw-bold text-primary">@Model.TotalArtists</div>
+                <div class="text-muted">Verified Artists</div>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="fs-2 fw-bold text-primary">@Model.TotalCommissions</div>
+                <div class="text-muted">Commissions Completed</div>
+            </div>
+            <div class="col-md-4">
+                <div class="fs-2 fw-bold text-primary">4.9/5</div>
+                <div class="text-muted">Average Rating</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ✅ Trending Categories: With Specific Images for Each Style -->
+<section class="py-5 py-lg-7">
+    <div class="container px-4 px-lg-5">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <h2 class="fw-bold mb-0">Trending Categories</h2>
+            <a asp-controller="Artists" asp-action="Browse" class="btn btn-link text-decoration-none text-muted">
+                VIEW ALL DISCIPLINES →
+            </a>
+        </div>
+        
+        @{
+            // ✅ Specific Unsplash images for each art style
+            var categoryImages = new Dictionary<string, string>
+            {
+                { "Abstract Art", "https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&w=600&q=80" },
+                { "Realism", "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&w=600&q=80" },
+                { "Impressionism", "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?auto=format&fit=crop&w=600&q=80" },
+                { "Pop Art", "https://images.unsplash.com/photo-1561214115-f2f134cc4912?auto=format&fit=crop&w=600&q=80" },
+                { "Minimalism", "https://images.unsplash.com/photo-1507643179173-39db7858c46f?auto=format&fit=crop&w=600&q=80" },
+                { "Digital Art", "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80" },
+                { "Oil Painting", "https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?auto=format&fit=crop&w=600&q=80" },
+                { "Watercolor", "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=600&q=80" }
+            };
+
+            var styles = new[] { "Abstract Art", "Realism", "Impressionism", "Pop Art", "Minimalism", "Digital Art", "Oil Painting", "Watercolor" };
+        }
+
+        <div class="row g-4">
+            @foreach (var style in styles)
+            {
+                var imageUrl = categoryImages.ContainsKey(style) ? categoryImages[style] : "https://images.unsplash.com/photo-1547891654-e66ed7ebb968?auto=format&fit=crop&w=600&q=80";
+                
+                <div class="col-md-6 col-lg-3">
+                    <a asp-controller="Categories" asp-action="ByStyle" asp-route-style="@style" class="text-decoration-none">
+                        <div class="card border-0 shadow-sm h-100 position-relative overflow-hidden" style="min-height: 280px; transition: transform 0.2s;">
+                            <!-- ✅ Real Image for Each Category -->
+                            <img src="@imageUrl"
+                                 class="card-img-top h-100 w-100"
+                                 style="object-fit: cover; transition: transform 0.3s;"
+                                 alt="@style"
+                                 onerror="this.src='https://images.unsplash.com/photo-1547891654-e66ed7ebb968?auto=format&fit=crop&w=600&q=80'">
+                            
+                            <!-- Gradient Overlay -->
+                            <div class="position-absolute top-0 start-0 w-100 h-100"
+                                 style="background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%);">
+                            </div>
+                            
+                            <!-- Text Content -->
+                            <div class="position-absolute bottom-0 start-0 w-100 p-3">
+                                <h5 class="text-white fw-bold mb-1">@style</h5>
+                                <small class="text-white-50">Explore artists & artworks</small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Recent Commissions: ONLY show if there are completed commissions -->
+@if (Model.ShowRecentCommissions && Model.RecentCommissions.Any())
+{
+    <section class="py-5 py-lg-7 bg-light">
+        <div class="container px-4 px-lg-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">Recent Commissions</h2>
+                <a asp-controller="Artists" asp-action="Browse" class="btn btn-link text-decoration-none">Start your project</a>
+            </div>
+            
+            <div class="row g-4">
+                @foreach (var commission in Model.RecentCommissions)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <h6 class="fw-bold mb-1">@commission.Artist?.Name</h6>
+                                        <small class="text-muted">Completed @(commission.RespondedAt?.ToString("MMM d") ?? "Recently")</small>
+                                    </div>
+                                    <span class="badge bg-success">Completed</span>
+                                </div>
+                                <p class="card-text small mb-3">@(commission.Description?.Length > 120 ? commission.Description?.Substring(0, 120) + "..." : commission.Description)</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold text-primary">$@commission.TotalPrice.ToString("F0")</span>
+                                    <a asp-controller="Artists" asp-action="Profile" asp-route-slug="@commission.Artist?.Slug" class="btn btn-sm btn-outline-primary">View Artist</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<!-- CTA Section -->
+<section class="py-5 py-lg-7 bg-primary text-white">
+    <div class="container px-4 px-lg-5 text-center">
+        <h2 class="fw-bold mb-3">Ready to Create Something Amazing?</h2>
+        <p class="lead mb-4">Join thousands of artists and clients bringing ideas to life.</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a asp-controller="Account" asp-action="Register" class="btn btn-light btn-lg px-4">Get Started Free</a>
+            <a asp-controller="Artists" asp-action="Browse" class="btn btn-outline-light btn-lg px-4">Explore Artists</a>
+        </div>
+    </div>
+</section>
