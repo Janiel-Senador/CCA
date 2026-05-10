@@ -1,21 +1,139 @@
-﻿<header class="bg-light border-bottom sticky-top">
-    <nav class="container d-flex justify-content-between align-items-center py-3">
-        <div class="d-flex align-items-center gap-4">
-            <a asp-controller="Home" asp-action="Index" class="text-decoration-none fw-bold fs-4 text-teal">Elnet-CCA</a>
-            <div class="d-none d-md-flex gap-3">
-                <a asp-controller="Home" asp-action="Index" class="text-decoration-none text-dark fw-bold border-bottom border-2 border-teal pb-1">Browse</a>
-                <a asp-controller="Artists" asp-action="Browse" class="text-decoration-none text-secondary">Artists</a>
-                <a href="#" class="text-decoration-none text-secondary">Gallery</a>
-                <a href="#" class="text-decoration-none text-secondary">Journal</a>
+﻿@* ✅ FIX: Added Microsoft.EntityFrameworkCore using directive *@
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<CCA.Models.ApplicationUser> SignInManager
+@inject UserManager<CCA.Models.ApplicationUser> UserManager
+@inject CCA.Data.CCFADbContext _context
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm sticky-top">
+    <div class="container-fluid px-4 px-lg-5">
+        <!-- Brand -->
+        <a asp-controller="Home" asp-action="Index" class="navbar-brand d-flex align-items-center">
+            <span class="fs-4 fw-bold text-primary">CCA</span>
+        </a>
+
+        <!-- Mobile Toggle -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <!-- Left Navigation -->
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a asp-controller="Home" asp-action="Index" class="nav-link fw-medium">Discover</a>
+                </li>
+                <li class="nav-item">
+                    <a asp-controller="Artists" asp-action="Browse" class="nav-link fw-medium">Artists</a>
+                </li>
+
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    var user = await UserManager.GetUserAsync(User);
+                    var userRole = user?.UserRole ?? "Customer";
+
+                    @if (userRole == "Artist")
+                    {
+                        <li class="nav-item">
+                            <a asp-controller="ArtistDashboard" asp-action="Index" class="nav-link fw-medium text-primary">Dashboard</a>
+                        </li>
+                    }
+
+                    @if (userRole == "Admin")
+                    {
+                        // 🔹 Count pending verifications safely
+                        var pendingCount = await _context.Artists
+                            .Include(a => a.ApplicationUser)
+                            .CountAsync(a => a.ApplicationUser != null && !a.ApplicationUser.IsVerified);
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle fw-medium text-danger" href="#" role="button" data-bs-toggle="dropdown">
+                                Admin
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow py-2" style="min-width: 220px;">
+                                <li>
+                                    <a class="dropdown-item py-2 px-3" asp-controller="Admin" asp-action="PendingArtists">
+                                        Pending Verifications
+                                        @if (pendingCount > 0)
+                                        {
+                                            <span class="badge bg-danger ms-2">@pendingCount</span>
+                                        }
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider my-1"></li>
+                                <li>
+                                    <a class="dropdown-item py-2 px-3" asp-controller="Admin" asp-action="Users">Manage Users</a>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+                }
+            </ul>
+
+            <!-- Center Search -->
+            <form class="d-flex mx-auto my-2 my-lg-0" asp-controller="Artists" asp-action="Browse" method="get" style="max-width: 400px; width: 100%;">
+                <div class="input-group">
+                    <input class="form-control form-control-sm border-end-0" type="search" name="search" placeholder="Search artists, styles..." aria-label="Search">
+                    <button class="btn btn-outline-secondary border-start-0" type="submit">Search</button>
+                </div>
+            </form>
+
+            <!-- Right Side Actions -->
+            <div class="d-flex align-items-center gap-2">
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    var user = await UserManager.GetUserAsync(User);
+
+                    <!-- Notifications -->
+                    <a asp-controller="Notifications" asp-action="Index" class="btn btn-link text-secondary position-relative p-0 me-1" title="Notifications">
+                        <i class="bi bi-bell"></i>
+                    </a>
+
+                    <!-- Messages -->
+                    <a asp-controller="Messages" asp-action="Index" class="btn btn-link text-secondary position-relative p-0 me-1" title="Messages">
+                        <i class="bi bi-chat-left-text"></i>
+                    </a>
+
+                    <!-- Profile Dropdown -->
+                    <div class="dropdown">
+                        <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
+                            <img src="@(user?.PortraitUrl?.StartsWith("/") == true ? user.PortraitUrl : "/" + (user?.PortraitUrl ?? "https://ui-avatars.com/api/?name=" + Uri.EscapeDataString(user?.FullName ?? "User") + "&background=random"))"
+                                 class="rounded-circle border me-2" width="36" height="36" alt="Profile">
+                            <span class="d-none d-md-inline small fw-medium">@(user?.FullName?.Split(' ')[0] ?? "Account")</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow py-2" style="min-width: 220px;">
+                            <li><a class="dropdown-item py-2 px-3" asp-controller="Account" asp-action="Profile">My Profile</a></li>
+                            <li><a class="dropdown-item py-2 px-3" asp-controller="Account" asp-action="Edit">Edit Account</a></li>
+
+                            @if (user?.UserRole == "Customer")
+                            {
+                                <li><a class="dropdown-item py-2 px-3" asp-controller="CustomerCommissions" asp-action="Index">My Commissions</a></li>
+                            }
+
+                            @if (user?.UserRole == "Artist")
+                            {
+                                <li><hr class="dropdown-divider my-1"></li>
+                                <li><a class="dropdown-item py-2 px-3" asp-controller="ArtistDashboard" asp-action="ManageTiers">Commission Tiers</a></li>
+                                <li><a class="dropdown-item py-2 px-3" asp-controller="ArtistDashboard" asp-action="Portfolio">Portfolio Manager</a></li>
+                                <li><a class="dropdown-item py-2 px-3" asp-controller="ArtistDashboard" asp-action="EditSettings">Artist Settings</a></li>
+                            }
+
+                            <li><hr class="dropdown-divider my-1"></li>
+                            <li>
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="dropdown-item py-2 px-3 text-danger">Logout</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary btn-sm px-3">Sign In</a>
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-sm px-3">Get Started</a>
+                }
             </div>
         </div>
-        <div class="d-flex align-items-center gap-3">
-            <div class="d-none d-lg-block position-relative">
-                <input type="search" class="form-control form-control-sm rounded-pill ps-4" placeholder="Search..." style="width: 200px;">
-                <span class="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted">🔍</span>
-            </div>
-            <button class="btn btn-link text-secondary p-0">🔔</button>
-            <button class="btn btn-link text-secondary p-0">👤</button>
-        </div>
-    </nav>
-</header>
+    </div>
+</nav>

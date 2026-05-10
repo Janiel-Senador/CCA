@@ -1,17 +1,20 @@
-﻿@* Reusable artist card - no model needed for front-end demo *@
+﻿@model CCA.Models.Artist
 <div class="card border-0 shadow-sm h-100">
-    <div class="bg-dark rounded-top" style="height: 200px;"></div>
+    <img src="@Model.PortraitUrl" class="card-img-top" style="height:200px; object-fit:cover;" alt="@Model.Name">
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-start mb-2">
             <div>
-                <h5 class="card-title mb-0">Artist Name</h5>
-                <small class="text-muted">Digital Art Specialist</small>
+                <h5 class="card-title mb-0">@Model.Name</h5>
+                <small class="text-muted">@Model.Location</small>
             </div>
-            <span class="badge bg-light text-dark border">4.8 ★</span>
+            <span class="badge bg-warning text-dark">@Model.Rating ★</span>
         </div>
         <div class="d-flex justify-content-between align-items-center pt-3 border-top">
-            <span class="fw-bold text-teal">$350+</span>
-            <a asp-controller="Artists" asp-action="Profile" asp-route-slug="demo" class="text-decoration-none text-teal fw-bold small">Inquire →</a>
+            @* ✅ SAFE: Prevents "Sequence contains no elements" crash *@
+            <span class="fw-bold text-primary">
+                $@(Model.CommissionTiers?.Any() == true ? Model.CommissionTiers.Min(t => t.Price).ToString("F0") : "0")
+            </span>
+            <a asp-controller="Artists" asp-action="Profile" asp-route-slug="@Model.Slug" class="text-decoration-none text-primary fw-bold small">Inquire →</a>
         </div>
     </div>
 </div>
