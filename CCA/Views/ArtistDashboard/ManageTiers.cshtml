@@ -1,0 +1,135 @@
+﻿@model List<CCA.Models.CommissionTier>
+@{
+    ViewData["Title"] = "Commission Tiers";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold">💰 Commission Tiers</h3>
+    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addTierModal">+ Add Tier</button>
+</div>
+
+@if (Model != null && Model.Any())
+{
+    <div class="row g-4">
+        @foreach (var tier in Model.OrderBy(t => t.Price))
+        {
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <h5 class="fw-bold text-primary mb-1">@tier.Name</h5>
+                            <span class="badge bg-light text-dark border">$@tier.Price.ToString("F0")</span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(tier.Description))
+                        {
+                            <p class="text-muted small mb-3">@tier.Description</p>
+                        }
+                        
+                        <div class="btn-group w-100" role="group">
+                            <button class="btn btn-sm btn-outline-secondary edit-tier-btn"
+                                    data-id="@tier.Id"
+                                    data-price="@tier.Price"
+                                    data-desc="@(tier.Description ?? "")">
+                                ✏️ Edit
+                            </button>
+                            <form asp-action="DeleteTier" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="tierId" value="@tier.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('Delete this commission tier?')">
+                                    🗑️
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="card shadow-sm border-0 text-center py-5">
+        <div class="card-body">
+            <div class="display-6 mb-3">💰</div>
+            <p class="mb-3 text-muted">No commission tiers set up yet.</p>
+            <p class="small text-muted mb-4">Add pricing packages so customers know what to expect.</p>
+            <button class="btn btn-primary px-4" data-bs-toggle="modal" data-bs-target="#addTierModal">
+                + Create Your First Tier
+            </button>
+        </div>
+    </div>
+}
+
+<!-- Add Tier Modal -->
+<div class="modal fade" id="addTierModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form asp-action="AddTier" method="post" class="modal-content">
+            @Html.AntiForgeryToken()
+            <div class="modal-header">
+                <h5 class="modal-title">Add Commission Tier</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Tier Name</label>
+                    <input name="name" class="form-control" placeholder="e.g. Portrait Sketch, Full Painting" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Base Price ($)</label>
+                    <input name="price" type="number" step="0.01" min="1" class="form-control" placeholder="100" required />
+                </div>
+                <div class="mb-0">
+                    <label class="form-label fw-bold">Description (Optional)</label>
+                    <textarea name="description" class="form-control" rows="2" placeholder="What's included in this tier?"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary">Add Tier</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Tier Modal -->
+<div class="modal fade" id="editTierModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form asp-action="UpdateTier" method="post" class="modal-content">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="tierId" id="editTierId" />
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Tier</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Base Price ($)</label>
+                    <input name="price" type="number" step="0.01" min="1" id="editTierPrice" class="form-control" required />
+                </div>
+                <div class="mb-0">
+                    <label class="form-label fw-bold">Description</label>
+                    <textarea name="description" id="editTierDesc" class="form-control" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Edit button handler
+        document.querySelectorAll('.edit-tier-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('editTierId').value = btn.dataset.id;
+                document.getElementById('editTierPrice').value = btn.dataset.price;
+                document.getElementById('editTierDesc').value = btn.dataset.desc || '';
+                new bootstrap.Modal(document.getElementById('editTierModal')).show();
+            });
+        });
+    </script>
+}

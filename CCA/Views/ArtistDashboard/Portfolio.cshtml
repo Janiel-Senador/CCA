@@ -1,0 +1,89 @@
+﻿@model List<CCA.Models.Artwork>
+@{
+    ViewData["Title"] = "Portfolio Manager";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold">Portfolio Manager</h3>
+        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#uploadModal">Upload Artwork</button>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var art in Model)
+            {
+                <div class="col-md-4 col-lg-3">
+                    <div class="card shadow-sm border-0 h-100 position-relative">
+                        <img src="@(art.ImageUrl?.StartsWith("/") == true ? art.ImageUrl : "/" + art.ImageUrl)"
+                             class="card-img-top" style="height:220px;object-fit:cover;" alt="@art.Title"
+                             onerror="this.src='https://via.placeholder.com/300x220?text=Image+Not+Found'">
+                        <div class="card-body p-3">
+                            <h6 class="fw-bold mb-1">@(art.Title ?? "Untitled")</h6>
+                            @if (!string.IsNullOrEmpty(art.Category))
+                            {
+                                <small class="text-muted d-block">@art.Category</small>
+                            }
+                            @if (!string.IsNullOrEmpty(art.Medium))
+                            {
+                                <small class="text-muted d-block">@art.Medium</small>
+                            }
+                            <form asp-action="DeleteArtwork" method="post" class="mt-3">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="artworkId" value="@art.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger w-100" onclick="return confirm('Delete this artwork?')">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0 text-center py-5">
+            <div class="card-body">
+                <h5>Portfolio is empty</h5>
+                <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#uploadModal">Upload First Artwork</button>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Upload Modal -->
+<div class="modal fade" id="uploadModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form asp-action="UploadArtwork" method="post" enctype="multipart/form-data" class="modal-content">
+            @Html.AntiForgeryToken()
+            <div class="modal-header"><h5 class="modal-title">Upload Artwork</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <input type="file" name="file" class="form-control mb-2" accept="image/*" required />
+                <input name="title" class="form-control mb-2" placeholder="Title" required />
+            
+                <!-- ✅ UPDATED: Exact 8 Art Styles -->
+                <select name="category" class="form-select mb-2" required>
+                    <option value="">Select Art Style</option>
+                    <option value="Abstract Art">Abstract Art</option>
+                    <option value="Realism">Realism</option>
+                    <option value="Impressionism">Impressionism</option>
+                    <option value="Pop Art">Pop Art</option>
+                    <option value="Minimalism">Minimalism</option>
+                    <option value="Digital Art">Digital Art</option>
+                    <option value="Oil Painting">Oil Painting</option>
+                    <option value="Watercolor">Watercolor</option>
+                </select>
+            
+                <input name="medium" class="form-control mb-2" placeholder="Medium (e.g. Oil on Canvas)" />
+                <textarea name="description" class="form-control" rows="2" placeholder="Description"></textarea>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary">Upload</button></div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('uploadModal')?.addEventListener('hidden.bs.modal', function () { const f = this.querySelector('form'); if (f) f.reset(); });
+    </script>
+}

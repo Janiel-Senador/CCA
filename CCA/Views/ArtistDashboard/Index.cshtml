@@ -1,0 +1,98 @@
+﻿@model CCA.ViewModels.ArtistDashboardViewModel
+@{
+    ViewData["Title"] = "Artist Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">🎨 Welcome, @Model.ArtistName!</h2>
+    @if (!Model.IsVerified)
+    {
+        <span class="badge bg-warning text-dark">⏳ Pending Verification</span>
+    }
+    else
+    {
+        <span class="badge bg-success">✓ Verified Artist</span>
+    }
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted mb-1">Total Earnings</h6>
+                <h3 class="fw-bold text-primary mb-0">$@Model.TotalEarnings.ToString("F0")</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted mb-1">Pending Requests</h6>
+                <h3 class="fw-bold text-warning mb-0">@Model.PendingRequests</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted mb-1">Active Commissions</h6>
+                <h3 class="fw-bold text-success mb-0">@Model.ActiveCommissions</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Commissions -->
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white border-bottom py-3">
+        <h5 class="fw-bold mb-0">Recent Commissions</h5>
+    </div>
+    <div class="card-body p-0">
+        @if (Model.RecentCommissions.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>Customer</th>
+                            <th>Description</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var commission in Model.RecentCommissions)
+                        {
+                            <tr>
+                                <td>@commission.CustomerName</td>
+                                <td>@commission.Description</td>
+                                <td class="fw-bold">$@commission.TotalPrice.ToString("F0")</td>
+                                <td>
+                                    <span class="badge bg-@(commission.Status == "Completed" ? "success" :
+                                                                                                                                          commission.Status == "In Progress" ? "primary" :
+                                                                                                                                          commission.Status == "Pending" ? "warning" : "secondary")">
+                                        @commission.Status
+                                    </span>
+                                </td>
+                                <td>@commission.CreatedAt.ToString("MMM d")</td>
+                                <td>
+                                    <a asp-action="Commissions" class="btn btn-sm btn-outline-secondary">View</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5 text-muted">
+                <p class="mb-0">No commissions yet.</p>
+                <small>Share your profile to start receiving requests!</small>
+            </div>
+        }
+    </div>
+</div>
