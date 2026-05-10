@@ -1,0 +1,37 @@
+﻿-- 🔹 Update BOTH Identity Role AND UserRole column
+DECLARE @UserId NVARCHAR(450) = (SELECT Id FROM AspNetUsers WHERE Email = 'admin@cca.com');
+
+IF @UserId IS NOT NULL
+BEGIN
+    -- 1. Ensure Admin role exists in Identity Roles
+    IF NOT EXISTS (SELECT 1 FROM AspNetRoles WHERE Name = 'Admin')
+    BEGIN
+        INSERT INTO AspNetRoles (Id, Name, NormalizedName, ConcurrencyStamp) 
+        VALUES (NEWID(), 'Admin', 'ADMIN', NEWID());
+    END
+
+    -- 2. Add user to Admin Identity Role
+    DECLARE @AdminRoleId NVARCHAR(450) = (SELECT Id FROM AspNetRoles WHERE Name = 'Admin');
+    
+    IF NOT EXISTS (SELECT 1 FROM AspNetUserRoles WHERE UserId = @UserId AND RoleId = @AdminRoleId)
+    BEGIN
+        INSERT INTO AspNetUserRoles (UserId, RoleId) VALUES (@UserId, @AdminRoleId);
+        PRINT '✅ Added to Identity Admin role';
+    END
+
+    -- 3. 🔹 CRITICAL: Update the UserRole column (this is what your app checks)
+    UPDATE AspNetUsers 
+    SET UserRole = 'Admin', 
+        IsVerified = 1, 
+        VerifiedAt = GETUTCDATE()
+    WHERE Id = @UserId;
+    
+    PRINT '✅ Updated UserRole column to Admin';
+    
+    -- 4. Verify
+    SELECT Email, FullName, UserRole, IsVerified FROM AspNetUsers WHERE Id = @UserId;
+END
+ELSE
+BEGIN
+    PRINT '❌ User admin@cca.com not found';
+END
