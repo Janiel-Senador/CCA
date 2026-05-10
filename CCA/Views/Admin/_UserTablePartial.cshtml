@@ -1,0 +1,136 @@
+﻿@model IEnumerable<CCA.Models.ApplicationUser>
+@inject CCA.Data.CCFADbContext _context
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Verified</th>
+                        <th>Joined</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        var artist = user.UserRole == "Artist"
+                            ? await _context.Artists.FirstOrDefaultAsync(a => a.ApplicationUserId == user.Id)
+                            : null;
+
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img src="@(user.PortraitUrl?.StartsWith("/") == true ? user.PortraitUrl : "/" + (user.PortraitUrl ?? "https://ui-avatars.com/api/?name=" + Uri.EscapeDataString(user.FullName ?? "User") + "&background=random"))"
+                                         class="rounded-circle border me-2" width="40" height="40" alt="@user.FullName">
+                                    <div>
+                                        <strong>@user.FullName</strong>
+                                        @if (artist != null && !string.IsNullOrEmpty(artist.Location))
+                                        {
+                                            <br><small class="text-muted">📍 @artist.Location</small>
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <a href="mailto:@user.Email">@user.Email</a>
+                                @if (user.EmailConfirmed)
+                                {
+                                    <br><span class="badge bg-success">Confirmed</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge bg-@(
+                                                                          user.UserRole == "Admin" ? "danger" :
+                                                                          user.UserRole == "Artist" ? "primary" : "secondary")">
+                                    @user.UserRole
+                                </span>
+                            </td>
+                            <td>
+                                @if (user.IsVerified)
+                                {
+                                    <span class="badge bg-success">✓ Verified</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                }
+                            </td>
+                            <td>
+                                @* ✅ FIX: Removed invalid ?. on non-nullable DateTime/bool types *@
+                                @(artist != null ? artist.MemberSince.ToString("MMM d, yyyy") : "N/A")
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#userModal_@user.Id">View</button>
+                                    @if (user.UserRole != "Admin")
+                                    {
+                                        <form asp-controller="Admin" asp-action="DeleteUser" method="post" class="d-inline" onsubmit="return confirm('Delete this user?')">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="userId" value="@user.Id" />
+                                            <button type="submit" class="btn btn-outline-danger">Delete</button>
+                                        </form>
+                                    }
+                                </div>
+                                
+                                <!-- User Details Modal -->
+                                <div class="modal fade" id="userModal_@user.Id" tabindex="-1">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h6 class="modal-title">User Details: @user.FullName</h6>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <p><strong>ID:</strong> <small class="text-muted">@user.Id</small></p>
+                                                        <p><strong>Username:</strong> @user.UserName</p>
+                                                        <p><strong>Email:</strong> @user.Email</p>
+                                                        <p><strong>Role:</strong> @user.UserRole</p>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <p><strong>Verified:</strong> @(user.IsVerified ? "Yes" : "No")</p>
+                                                        <p><strong>Email Confirmed:</strong> @(user.EmailConfirmed ? "Yes" : "No")</p>
+                                                        @if (user.VerifiedAt.HasValue)
+                                                        {
+                                                            <p><strong>Verified At:</strong> @user.VerifiedAt.Value.ToString("MMM d, yyyy")</p>
+                                                        }
+                                                    </div>
+                                                </div>
+                                                
+                                                @if (artist != null)
+                                                {
+                                                    <hr>
+                                                    <h6 class="fw-bold">Artist Details</h6>
+                                                    <div class="row g-3">
+                                                        <div class="col-md-6">
+                                                            <p><strong>Location:</strong> @artist.Location</p>
+                                                            <p><strong>Response Time:</strong> @artist.ResponseTime</p>
+                                                            <p><strong>Member Since:</strong> @artist.MemberSince.ToString("MMM d, yyyy")</p>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <p><strong>Art Styles:</strong> @artist.ArtStyles</p>
+                                                            <p><strong>Website:</strong> @(string.IsNullOrEmpty(user.WebsiteUrl) ? "None" : user.WebsiteUrl)</p>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,101 @@
+﻿@model List<CCA.Models.ApplicationUser>
+@inject CCA.Data.CCFADbContext _context
+@{
+    ViewData["Title"] = "Manage Users";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold">Manage Users</h3>
+        <span class="badge bg-primary">@Model.Count total users</span>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>User</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Verified</th>
+                                <th>Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Model)
+                            {
+                                // 🔹 Fetch Artist data for MemberSince if user is an Artist
+                                var artist = user.UserRole == "Artist"
+                                    ? await _context.Artists.FirstOrDefaultAsync(a => a.ApplicationUserId == user.Id)
+                                    : null;
+
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="@(user.PortraitUrl?.StartsWith("/") == true ? user.PortraitUrl : "/" + (user.PortraitUrl ?? "https://ui-avatars.com/api/?name=" + Uri.EscapeDataString(user.FullName ?? "User") + "&background=random"))"
+                                                 class="rounded-circle border me-2" width="40" height="40" alt="@user.FullName">
+                                            <strong>@user.FullName</strong>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <a href="mailto:@user.Email">@user.Email</a>
+                                        @if (user.EmailConfirmed)
+                                        {
+                                            <br><span class="badge bg-success">Confirmed</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-@(
+                                                                                          user.UserRole == "Admin" ? "danger" :
+                                                                                          user.UserRole == "Artist" ? "primary" : "secondary")">
+                                            @user.UserRole
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (user.IsVerified)
+                                        {
+                                            <span class="badge bg-success">✓</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @* ✅ FIX: Use artist.MemberSince (DateTime) for Artists, fallback for others *@
+                                        @(artist?.MemberSince.ToString("MMM d, yyyy") ?? "N/A")
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            @if (user.UserRole != "Admin")
+                                            {
+                                                <form asp-controller="Admin" asp-action="DeleteUser" method="post" class="d-inline" onsubmit="return confirm('Delete @user.FullName? This cannot be undone.')">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="userId" value="@user.Id" />
+                                                    <button type="submit" class="btn btn-outline-danger">Delete</button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0 text-center py-5">
+            <div class="card-body">
+                <p class="text-muted mb-0">No users found in the system.</p>
+            </div>
+        </div>
+    }
+</div>
