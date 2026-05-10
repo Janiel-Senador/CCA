@@ -1,0 +1,73 @@
+﻿@model CCA.Models.Artwork
+@{
+    ViewData["Title"] = Model?.Title ?? "Artwork Details";
+}
+
+<div class="container py-4">
+    <div class="row g-4">
+        <!-- Artwork Image -->
+        <div class="col-lg-7">
+            <img src="@(Model?.ImageUrl?.StartsWith("/") == true ? Model.ImageUrl : "/" + (Model?.ImageUrl ?? "https://via.placeholder.com/600x400"))"
+                 class="img-fluid rounded-3 shadow" alt="@Model?.Title"
+                 onerror="this.src='https://via.placeholder.com/600x400?text=Image+Not+Found'">
+        </div>
+        
+        <!-- Artwork Details -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <h2 class="fw-bold mb-2">@(Model?.Title ?? "Untitled")</h2>
+                    
+                    @if (Model?.Artist != null)
+                    {
+                        <p class="text-muted mb-3">
+                            by <a asp-controller="Artists" asp-action="Profile" asp-route-slug="@Model.Artist.Slug" class="text-decoration-none">@Model.Artist.Name</a>
+                            @* ✅ FIX: Use == true to convert bool? to bool *@
+                            @if (Model.Artist.ApplicationUser?.IsVerified == true)
+                            {
+                                <span class="badge bg-success ms-1">Verified</span>
+                            }
+                        </p>
+                    }
+                    
+                    @if (!string.IsNullOrEmpty(Model?.Category))
+                    {
+                        <p class="mb-2"><strong>Category:</strong> @Model.Category</p>
+                    }
+                    @if (!string.IsNullOrEmpty(Model?.Medium))
+                    {
+                        <p class="mb-2"><strong>Medium:</strong> @Model.Medium</p>
+                    }
+                    @if (Model?.Year.HasValue == true)
+                    {
+                        <p class="mb-2"><strong>Year:</strong> @Model.Year.Value</p>
+                    }
+                    
+                    @if (!string.IsNullOrEmpty(Model?.Description))
+                    {
+                        <div class="mb-4">
+                            <strong>Description</strong>
+                            <p class="text-muted">@Model.Description</p>
+                        </div>
+                    }
+                    
+                    @if (Model?.Artist != null)
+                    {
+                        <a asp-controller="Commissions" asp-action="Create" asp-route-artistId="@Model.Artist.Id" class="btn btn-primary w-100">
+                            Request Commission from @Model.Artist.Name
+                        </a>
+                        <a asp-controller="Artists" asp-action="Profile" asp-route-slug="@Model.Artist.Slug" class="btn btn-outline-secondary w-100 mt-2">
+                            View Artist Profile
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Artists" asp-action="Browse" class="btn btn-outline-secondary w-100">
+                            Browse All Artists
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
