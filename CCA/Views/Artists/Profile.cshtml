@@ -1,137 +1,90 @@
-﻿@{
-    ViewData["Title"] = "Artist Profile";
+﻿@model CCA.ViewModels.ArtistProfileViewModel
+@inject Microsoft.AspNetCore.Identity.SignInManager<CCA.Models.ApplicationUser> SignInManager
+@{
+    ViewData["Title"] = $"{Model?.Name ?? "Artist"} - Profile";
 }
 
-<partial name="_TopAppBar" />
-
-<main class="container py-4">
-    @* Profile Header *@
-    <section class="row g-4 mb-5">
-        <div class="col-md-4">
-            <div class="bg-dark rounded-3" style="height: 400px;"></div>
+<div class="container py-4">
+    <!-- Profile Header -->
+    <div class="row mb-4">
+        <div class="col-md-3 text-center">
+            <img src="@(Model?.PortraitUrl?.StartsWith("/") == true ? Model.PortraitUrl : "/" + (Model?.PortraitUrl ?? "https://ui-avatars.com/api/?name=" + Uri.EscapeDataString(Model?.Name ?? "Artist") + "&background=random"))"
+                 class="rounded-circle border shadow-sm mb-3" width="150" height="150" alt="@Model?.Name"
+                 onerror="this.src='https://ui-avatars.com/api/?name=@(Uri.EscapeDataString(Model?.Name ?? "Artist"))&background=random'">
+            @if (Model?.IsVerified == true)
+            {
+                <span class="badge bg-success mb-2">Verified Artist</span>
+            }
         </div>
-        <div class="col-md-8 d-flex flex-column justify-content-between">
-            <div>
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <span class="badge bg-teal bg-opacity-10 text-teal">Featured Artist</span>
-                    <span class="text-warning fw-bold">★ 4.9</span>
-                </div>
-                <h1 class="display-4 fw-bold">Elena Vancroft</h1>
-                <p class="text-muted"><span class="me-2">📍</span>Copenhagen, Denmark</p>
-                <p class="lead text-muted">Synthesizing classical brushwork with digital precision. Specializing in ethereal character portraits.</p>
+        <div class="col-md-9">
+            <h2 class="fw-bold mb-1">@Model?.Name</h2>
+            <p class="text-muted mb-2">@(Model?.Location ?? "Location not set")</p>
+            <div class="d-flex gap-3 mb-3 flex-wrap">
+                <span>⭐ @(Model?.Rating.ToString("F1") ?? "0.0")</span>
+                <span>@(Model?.ArtStyles ?? "No styles listed")</span>
+                <span>@(Model?.ResponseTime ?? "Unknown")</span>
             </div>
-            <div class="d-flex gap-3">
-                <a asp-controller="Commissions" asp-action="Create" asp-route-artistSlug="elena" class="btn btn-teal px-4">Message Artist</a>
-                <button class="btn btn-outline-secondary px-4">Follow</button>
+            @* ✅ FIXED: Uses Model?.ApplicationUser?.Email safely *@
+            @if (SignInManager.IsSignedIn(User) && User.Identity?.Name != Model?.ApplicationUser?.Email)
+            {
+                <a asp-controller="Commissions" asp-action="Create" asp-route-artistId="@(Model?.Id)" class="btn btn-primary px-4">Request Commission</a>
+            }
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model?.Bio))
+    {
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+                <h5 class="fw-bold mb-3">About @Model?.Name</h5>
+                <p>@Model.Bio</p>
             </div>
         </div>
-    </section>
+    }
 
-    <div class="row g-5">
-        @* Gallery *@
-        <div class="col-lg-8">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h3 class="fw-bold">Selected Works</h3>
-                <div class="d-flex gap-3 small">
-                    <span class="fw-bold text-teal border-bottom border-2 border-teal pb-1">Portfolio</span>
-                    <a href="#" class="text-decoration-none text-muted">Exhibitions</a>
-                    <a href="#" class="text-decoration-none text-muted">Process</a>
-                </div>
-            </div>
-            <div class="row g-4">
-                <div class="col-12">
-                    <div class="card border-0">
-                        <div class="bg-dark rounded" style="height: 300px;"></div>
-                        <div class="card-body px-0">
-                            <h5 class="card-title fst-italic">The Weaver of Stars</h5>
-                            <small class="text-muted">Digital Oil, 2024</small>
-                        </div>
-                    </div>
-                </div>
-                @for (int i = 0; i < 4; i++)
+    @if (Model?.Rates != null && Model.Rates.Any())
+    {
+        <div class="mb-4">
+            <h5 class="fw-bold mb-3">Commission Rates</h5>
+            <div class="row g-3">
+                @foreach (var tier in Model.Rates)
                 {
-                    <div class="col-md-6">
-                        <div class="card border-0">
-                            <div class="bg-dark rounded" style="height: 200px;"></div>
-                            <div class="card-body px-0">
-                                <h6 class="card-title fst-italic">Artwork @i</h6>
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <h6 class="fw-bold text-primary mb-1">@tier.Name</h6>
+                                <p class="small text-muted mb-2">@(tier.Description ?? "")</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold">$@tier.Price.ToString("F0")</span>
+                                    <a asp-controller="Commissions" asp-action="Create" asp-route-artistId="@(Model.Id)" class="btn btn-sm btn-outline-primary">Request</a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 }
             </div>
         </div>
+    }
 
-        @* Sidebar *@
-        <aside class="col-lg-4">
-            <div class="sticky-top pt-4">
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-body">
-                        <h5 class="fw-bold mb-4">Commission Rates</h5>
-                        <div class="mb-3 pb-3 border-bottom">
-                            <div class="d-flex justify-content-between">
-                                <span class="fw-semibold">Digital Bust</span>
-                                <span class="fw-bold text-teal">$180</span>
-                            </div>
-                            <small class="text-muted d-block mt-1">Chest-up portrait, detailed lighting</small>
-                            <button class="btn btn-sm btn-outline-teal w-100 mt-2">Request Quote</button>
-                        </div>
-                        <div class="mb-3 pb-3 border-bottom">
-                            <div class="d-flex justify-content-between">
-                                <span class="fw-semibold">Full Body</span>
-                                <span class="fw-bold text-teal">$450</span>
-                            </div>
-                            <small class="text-muted d-block mt-1">Full character with environment</small>
-                            <button class="btn btn-sm btn-outline-teal w-100 mt-2">Request Quote</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card border-0 bg-light">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center gap-3 mb-3">
-                            <span>🕐</span>
-                            <div>
-                                <small class="text-muted text-uppercase fw-bold d-block">Response Time</small>
-                                <span class="fw-semibold">Under 24 hours</span>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-center gap-3">
-                            <span>📅</span>
-                            <div>
-                                <small class="text-muted text-uppercase fw-bold d-block">Member Since</small>
-                                <span class="fw-semibold">October 2021</span>
+    @if (Model?.Portfolio != null && Model.Portfolio.Any())
+    {
+        <div class="mb-4">
+            <h5 class="fw-bold mb-3">Portfolio</h5>
+            <div class="row g-3">
+                @foreach (var art in Model.Portfolio)
+                {
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <img src="@(art.ImageUrl?.StartsWith("/") == true ? art.ImageUrl : "/" + (art.ImageUrl ?? "https://via.placeholder.com/300x220"))"
+                                 class="card-img-top" style="height:180px;object-fit:cover;" alt="@(art.Title ?? "Artwork")">
+                            <div class="card-body p-2">
+                                <h6 class="small fw-bold mb-0">@(art.Title ?? "Untitled")</h6>
+                                <small class="text-muted">@(art.Category ?? "Uncategorized")</small>
                             </div>
                         </div>
                     </div>
-                </div>
+                }
             </div>
-        </aside>
-    </div>
-
-    @* Reviews *@
-    <section class="mt-5 pt-5 border-top">
-        <h3 class="fw-bold mb-4">Client Feedback</h3>
-        <div class="row g-4">
-            @for (int i = 0; i < 3; i++)
-            {
-                <div class="col-md-4">
-                    <div class="card border-0 bg-light h-100">
-                        <div class="card-body">
-                            <p class="fst-italic mb-4">"Amazing work and professional communication throughout the process."</p>
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="bg-dark rounded-circle" style="width: 40px; height: 40px;"></div>
-                                <div>
-                                    <small class="fw-bold d-block">Reviewer @i</small>
-                                    <small class="text-muted">Art Collector</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
         </div>
-    </section>
-</main>
-
-<partial name="_Footer" />
+    }
+</div>
