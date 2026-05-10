@@ -1,0 +1,101 @@
+﻿@model CCA.Models.CommissionRequest
+@{
+    ViewData["Title"] = $"Commission #@Model.Id";
+}
+
+<div class="container py-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white border-bottom py-3">
+            <h4 class="fw-bold mb-0">Commission Details</h4>
+        </div>
+        <div class="card-body p-4">
+            <!-- Status Badge -->
+            <div class="mb-4">
+                <span class="badge bg-@(
+                                          Model.Status == "Accepted" ? "success" :
+                                          Model.Status == "Declined" ? "danger" :
+                                          Model.Status == "Completed" ? "primary" :
+                                          Model.Status == "Cancelled" ? "secondary" : "warning") fs-6">
+                    @Model.Status
+                </span>
+            </div>
+
+            <!-- Artist Info -->
+            @if (Model.Artist != null)
+            {
+                <div class="d-flex align-items-center mb-4 p-3 bg-light rounded">
+                    <img src="@(Model.Artist.ApplicationUser?.PortraitUrl?.StartsWith("/") == true
+                                                                       ? Model.Artist.ApplicationUser.PortraitUrl
+                                                                       : "/" + (Model.Artist.ApplicationUser?.PortraitUrl ?? "https://ui-avatars.com/api/?name=" + Uri.EscapeDataString(Model.Artist.Name) + "&background=random"))"
+                         class="rounded-circle border me-3" width="60" height="60"
+                         alt="@Model.Artist.Name"
+                         onerror="this.src='https://ui-avatars.com/api/?name=@(Uri.EscapeDataString(Model.Artist.Name))&background=random'">
+                    <div>
+                        <h5 class="fw-bold mb-0">@Model.Artist.Name</h5>
+                        @if (Model.Artist.ApplicationUser?.IsVerified == true)
+                        {
+                            <span class="badge bg-success">Verified Artist</span>
+                        }
+                        <p class="text-muted mb-0">@Model.Artist.Location</p>
+                    </div>
+                </div>
+            }
+
+            <!-- Commission Details Grid -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <p class="mb-1"><strong>Description</strong></p>
+                    <p class="text-muted">@Model.Description</p>
+                </div>
+                <div class="col-md-6">
+                    <p class="mb-1"><strong>Turnaround</strong></p>
+                    <p class="text-muted">@Model.TurnaroundOption</p>
+                </div>
+                <div class="col-md-6">
+                    <p class="mb-1"><strong>Base Price</strong></p>
+                    <p class="text-muted">$@Model.BasePrice.ToString("F0")</p>
+                </div>
+                <div class="col-md-6">
+                    <p class="mb-1"><strong>Total Price</strong></p>
+                    <p class="fw-bold text-primary">$@Model.TotalPrice.ToString("F0")</p>
+                </div>
+                <div class="col-md-6">
+                    <p class="mb-1"><strong>Requested</strong></p>
+                    <p class="text-muted">@Model.CreatedAt.ToString("MMM d, yyyy h:mm tt")</p>
+                </div>
+                @if (Model.RespondedAt.HasValue)
+                {
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Responded</strong></p>
+                        <p class="text-muted">@Model.RespondedAt.Value.ToString("MMM d, yyyy h:mm tt")</p>
+                    </div>
+                }
+            </div>
+
+            <!-- Artist Response (if declined) -->
+            @if (!string.IsNullOrEmpty(Model.ArtistResponse) && Model.Status == "Declined")
+            {
+                <div class="alert alert-light border mb-4">
+                    <strong>Artist's Response:</strong>
+                    <p class="mb-0">@Model.ArtistResponse</p>
+                </div>
+            }
+
+            <!-- Action Buttons -->
+            <div class="d-flex gap-3">
+                @if (Model.Status == "Pending")
+                {
+                    <form asp-action="Cancel" asp-route-id="@Model.Id" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Cancel this commission request?')">Cancel Request</button>
+                    </form>
+                }
+                @if (Model.Status == "Accepted")
+                {
+                    <a asp-controller="Messages" asp-action="Chat" asp-route-userId="@Model.Artist?.ApplicationUserId" class="btn btn-primary">Message Artist</a>
+                }
+                <a asp-action="Index" class="btn btn-outline-secondary">Back to My Commissions</a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,96 @@
+﻿@model List<CCA.Models.CommissionRequest>
+@{
+    ViewData["Title"] = "My Commission Requests";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold">📋 My Commission Requests</h3>
+        <span class="badge bg-primary">@Model.Count(cr => cr.Status == "Pending") pending</span>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Artist</th>
+                                <th>Description</th>
+                                <th>Price</th>
+                                <th>Turnaround</th>
+                                <th>Requested</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var req in Model.OrderByDescending(r => r.CreatedAt))
+                            {
+                                <tr class="@(req.Status == "Pending" ? "table-warning" : "")">
+                                    <td>
+                                        <strong>@req.Artist?.Name</strong>
+                                        @if (req.Artist?.ApplicationUser?.IsVerified == true)
+                                        {
+                                            <span class="badge bg-success ms-1">✓</span>
+                                        }
+                                    </td>
+                                    <td style="max-width: 300px;">
+                                        <p class="mb-0 text-truncate" title="@req.Description">@req.Description</p>
+                                    </td>
+                                    <td class="fw-bold">$@req.TotalPrice.ToString("F0")</td>
+                                    <td>
+                                        <span class="badge bg-@(req.TurnaroundOption == "express" ? "warning" : "secondary")">
+                                            @req.TurnaroundOption
+                                        </span>
+                                    </td>
+                                    <td>@req.CreatedAt.ToString("MMM d, yyyy")</td>
+                                    <td>
+                                        <span class="badge bg-@(
+                                                                                          req.Status == "Accepted" ? "success" :
+                                                                                          req.Status == "Declined" ? "danger" :
+                                                                                          req.Status == "Completed" ? "primary" :
+                                                                                          req.Status == "Cancelled" ? "secondary" : "warning")">
+                                            @req.Status
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (req.Status == "Pending")
+                                        {
+                                            <form asp-action="Cancel" asp-route-id="@req.Id" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Cancel this commission request?')">Cancel</button>
+                                            </form>
+                                        }
+                                        else if (req.Status == "Accepted")
+                                        {
+                                            <a asp-controller="Messages" asp-action="Chat" asp-route-userId="@req.Artist?.ApplicationUserId" class="btn btn-sm btn-primary">💬 Message Artist</a>
+                                        }
+                                        else if (req.Status == "Declined" || req.Status == "Cancelled")
+                                        {
+                                            <small class="text-muted">@req.ArtistResponse</small>
+                                        }
+                                        <a asp-action="Details" asp-route-id="@req.Id" class="btn btn-sm btn-outline-secondary ms-1">View</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0 text-center py-5">
+            <div class="card-body">
+                <div class="display-1 mb-3">🎨</div>
+                <h5 class="fw-bold mb-2">No commission requests yet</h5>
+                <p class="text-muted mb-4">Start browsing artists and request your first commission!</p>
+                <a asp-controller="Artists" asp-action="Browse" class="btn btn-primary px-4">Browse Artists</a>
+            </div>
+        </div>
+    }
+</div>
