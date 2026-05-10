@@ -30,47 +30,35 @@ body {
   text-align: start;
 }
 
-/* Elnet-CCA Design Tokens */
 :root {
-    --teal: #00464a;
-    --teal-dark: #006064;
-    --surface: #f9f9f8;
+    --primary: #00464a;
+    --primary-dark: #006064;
 }
 
-.text-teal {
-    color: var(--teal) !important;
+.text-primary {
+    color: var(--primary) !important;
 }
 
-.bg-teal {
-    background-color: var(--teal) !important;
+.bg-primary {
+    background-color: var(--primary) !important;
 }
 
-.btn-teal {
-    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
-    color: white;
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
     border: none;
 }
 
-    .btn-teal:hover {
-        background: linear-gradient(135deg, var(--teal-dark), var(--teal));
-        color: white;
+    .btn-primary:hover {
         opacity: 0.95;
-    }
-
-.btn-outline-teal {
-    color: var(--teal);
-    border-color: var(--teal);
-}
-
-    .btn-outline-teal:hover {
-        background-color: var(--teal);
         color: white;
     }
 
-.border-dashed {
-    border-style: dashed !important;
+.btn-outline-primary {
+    color: var(--primary);
+    border-color: var(--primary);
 }
 
-.cursor-pointer {
-    cursor: pointer;
-}
+    .btn-outline-primary:hover {
+        background-color: var(--primary);
+        color: white;
+    }
